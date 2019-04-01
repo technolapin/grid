@@ -57,7 +57,7 @@ macro_rules! gen_grid_struct {
             fn get_cells(
                 &self,
                 (x0, y0): (isize, isize),
-                pattern: Vec<(isize, isize)>
+                pattern: &Vec<(isize, isize)>
             ) -> Vec<$t>
             {
                 let mut vec = Vec::new();
@@ -90,7 +90,6 @@ macro_rules! gen_grid_struct {
                 }
             }
             
-            
         }
     )
 }
@@ -98,25 +97,18 @@ macro_rules! gen_grid_struct {
 
 
 
+
 fn main() {
     let mut tab = [[1 as u64,2,3],[4,5,6],[7,8,9]];
     println!("{:?}", tab);
-    gen_grid_struct!(3, 3, u64);
+    gen_grid_struct!(32, 32, u64);
+    /*
     let mut gr = Grid{
         data: tab,
         default: 0
     };
     println!("{:?}", gr);
 
-    let pat = vec![
-        (-1, -1),
-        ( 0, -1),
-        ( 1,  0),
-        ( 1,  1),
-        ( 0,  1),
-        (-1,  1),
-        (-1,  0)
-    ];
     
     for i in -2..5
     {
@@ -127,8 +119,6 @@ fn main() {
         println!();
     }
 
-
-    println!("{:?}", gr.get_cells((1,0), pat.clone()));
     let manuel = vec![1,1,1,1,1,1,1,1];
 
     for i in -2..5
@@ -140,7 +130,6 @@ fn main() {
         println!();
     }
 
-    gr.set_cells((1, 0), pat.clone(), manuel);
 
     for i in -2..5
     {
@@ -151,6 +140,86 @@ fn main() {
         println!();
     }
 
-    println!("{:?}", gr.get_cells((1,0), pat));
+    println!("{:?}", gr.get_cells((1,0), &pat));
+
+     */
+
+    let pat = vec![
+        (-1, -1),
+        ( 0, -1),
+        ( 1, -1),
+        ( 1,  0),
+        ( 1,  1),
+        ( 0,  1),
+        (-1,  1),
+        (-1,  0)
+    ];
+
+    let mut tab = [[0u64; 32]; 32];
+
+    tab[1][1] = 1;
+    tab[2][2] = 1;
+    tab[2][3] = 1;
+    tab[1][3] = 1;
+    tab[0][3] = 1;
+
+    let mut grs = [
+        Grid
+        {
+            data: tab,
+            default: 0
+        },
+        Grid{
+            data: tab,
+            default: 0
+        }
+    ];
     
+    let mut flag_n = 0usize;
+    let mut flag_np1 = 1;
+    let mut tmp = 0;
+    let mut s = 0;
+    loop
+    {
+        println!("flags:{} {}", flag_n, flag_np1);
+        
+        for i in 0..(grs[flag_n].get_width() as isize)
+        {
+            for j in 0..(grs[flag_n].get_height() as isize)
+            {
+                s = 0;
+                for cell in grs[flag_n].get_cells((i, j), &pat)
+                {
+                    if cell == 1
+                    {
+                        s+=1;
+                    }
+                }
+                
+                grs[flag_np1].set_cell(
+                    if s < 2 || s > 3
+                {
+                    0
+                } else
+                {
+                    if s == 3
+                    {
+                        1
+                    }
+                    else
+                    {
+                        grs[flag_n].get_cell(i, j)
+                    }
+                }, i, j);
+                print!("{}", grs[flag_n].get_cell(i, j));
+            }
+            println!();
+        }
+
+
+        tmp = flag_np1;
+        flag_np1 = flag_n;
+        flag_n = tmp;
+            
+    }
 }
